@@ -45,7 +45,8 @@ class OrderServiceCharacterizationTest {
                 "Ivan Petrov", "Moscow, Lenina 1", "+79990000000", "vip", "SAVE10",
                 List.of(new CreateOrderRequest.Item(1L, 2)));
         line = new OrderLine(product, 2);
-        order = new Order(new Customer("Ivan Petrov", "Moscow, Lenina 1", "+79990000000"), Order.STATUS_NEW);
+        order = new Order(
+                new Customer("Ivan", "Petrov", "Moscow, Lenina 1", "+79990000000"), Order.STATUS_NEW);
     }
 
     @Test

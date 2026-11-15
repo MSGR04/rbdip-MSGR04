@@ -5,5 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
-    Optional<Customer> findFirstByFullNameAndAddress(String fullName, String address);
+    Optional<Customer> findFirstByFirstNameAndLastNameAndAddress(
+            String firstName, String lastName, String address);
 }

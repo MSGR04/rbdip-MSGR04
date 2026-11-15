@@ -44,7 +44,8 @@ class OrderWriterTest {
 
     @Test
     void createsCustomerAndOrderWithItems() {
-        when(customerRepository.findFirstByFullNameAndAddress("Ivan Petrov", "Moscow, Lenina 1"))
+        when(customerRepository.findFirstByFirstNameAndLastNameAndAddress(
+                        "Ivan", "Petrov", "Moscow, Lenina 1"))
                 .thenReturn(Optional.empty());
         when(customerRepository.save(any(Customer.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -68,8 +69,9 @@ class OrderWriterTest {
 
     @Test
     void reusesExistingCustomerAndRefreshesContactDetails() {
-        Customer existing = new Customer("Ivan Petrov", "Moscow, Lenina 1", null);
-        when(customerRepository.findFirstByFullNameAndAddress("Ivan Petrov", "Moscow, Lenina 1"))
+        Customer existing = new Customer("Ivan", "Petrov", "Moscow, Lenina 1", null);
+        when(customerRepository.findFirstByFirstNameAndLastNameAndAddress(
+                        "Ivan", "Petrov", "Moscow, Lenina 1"))
                 .thenReturn(Optional.of(existing));
         when(orderRepository.save(any(Order.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));

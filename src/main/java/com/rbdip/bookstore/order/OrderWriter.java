@@ -1,6 +1,7 @@
 package com.rbdip.bookstore.order;
 
 import com.rbdip.bookstore.customer.Customer;
+import com.rbdip.bookstore.customer.CustomerName;
 import com.rbdip.bookstore.customer.CustomerRepository;
 import java.util.List;
 import org.springframework.stereotype.Component;
@@ -31,11 +32,15 @@ public class OrderWriter {
     }
 
     private Customer findOrCreateCustomer(CreateOrderRequest request) {
-        return customerRepository.findFirstByFullNameAndAddress(
-                        request.customerFullName(), request.customerAddress())
+        CustomerName name = CustomerName.parse(request.customerFullName());
+        return customerRepository.findFirstByFirstNameAndLastNameAndAddress(
+                        name.firstName(), name.lastName(), request.customerAddress())
                 .map(customer -> updateContactDetails(customer, request))
                 .orElseGet(() -> customerRepository.save(new Customer(
-                        request.customerFullName(), request.customerAddress(), request.customerPhone())));
+                        name.firstName(),
+                        name.lastName(),
+                        request.customerAddress(),
+                        request.customerPhone())));
     }
 
     private Customer updateContactDetails(Customer customer, CreateOrderRequest request) {

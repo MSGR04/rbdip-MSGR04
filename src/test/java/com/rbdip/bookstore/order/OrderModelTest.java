@@ -11,7 +11,7 @@ class OrderModelTest {
 
     @Test
     void orderExposesCustomerDetailsAndDefaults() {
-        Customer customer = new Customer("Anna Sidorova", "SPb, Nevsky 10", "+79991112233");
+        Customer customer = new Customer("Anna", "Sidorova", "SPb, Nevsky 10", "+79991112233");
         Order order = new Order(customer, Order.STATUS_NEW);
 
         assertThat(order.getCustomer()).isSameAs(customer);
@@ -24,8 +24,10 @@ class OrderModelTest {
 
     @Test
     void customerExposesFieldsAndCanBeUpdated() {
-        Customer customer = new Customer("Ivan Petrov", "Moscow", null);
+        Customer customer = new Customer("Ivan", "Petrov", "Moscow", null);
 
+        assertThat(customer.getFirstName()).isEqualTo("Ivan");
+        assertThat(customer.getLastName()).isEqualTo("Petrov");
         assertThat(customer.getFullName()).isEqualTo("Ivan Petrov");
         assertThat(customer.getAddress()).isEqualTo("Moscow");
         assertThat(customer.getPhone()).isNull();
@@ -75,7 +77,7 @@ class OrderModelTest {
 
     @Test
     void loggingNotifierAcceptsOrderAndTotal() {
-        Order order = new Order(new Customer("Ivan Petrov", "Moscow", null), Order.STATUS_NEW);
+        Order order = new Order(new Customer("Ivan", "Petrov", "Moscow", null), Order.STATUS_NEW);
 
         new LoggingEmailNotifier().notifyOrderPlaced(order, new BigDecimal("70.00"));
     }
