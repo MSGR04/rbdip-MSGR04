@@ -210,6 +210,43 @@ class PricingCalculatorCharacterizationTest {
                 .isEqualByComparingTo("0.00");
     }
 
+    @Test
+    @DisplayName("Фиксированный купон применяется раньше скидки на крупный заказ")
+    void fixedCouponIsAppliedBeforeLargeOrderDiscount() {
+        assertThat(calculate(single(new BigDecimal("1009.00"), 1), REGULAR, "SAVE10"))
+                .isEqualByComparingTo("999.00");
+    }
+
+    @Test
+    @DisplayName("Процентный купон применяется после оптовой скидки")
+    void percentCouponIsAppliedAfterBulkDiscount() {
+        List<PricingCalculator.LineItem> items = List.of(
+                new PricingCalculator.LineItem(new BigDecimal("100.00"), 11));
+
+        assertThat(calculate(items, WHOLESALE, "SAVE20PERCENT")).isEqualByComparingTo("710.60");
+    }
+
+    @Test
+    @DisplayName("Фиксированный купон и скидка на крупный заказ суммируются")
+    void fixedCouponAndLargeOrderDiscountCombine() {
+        assertThat(calculate(single(new BigDecimal("2000.00"), 1), REGULAR, "SAVE10"))
+                .isEqualByComparingTo("1950.20");
+    }
+
+    @Test
+    @DisplayName("Оптовая скидка на дробную цену округляется HALF_UP")
+    void bulkDiscountOnFractionalPriceRoundsHalfUp() {
+        assertThat(calculate(single(new BigDecimal("0.33"), 11), REGULAR, null))
+                .isEqualByComparingTo("3.45");
+    }
+
+    @Test
+    @DisplayName("Скидка на крупный заказ с дробным результатом округляется HALF_UP")
+    void largeOrderDiscountRoundsHalfUp() {
+        assertThat(calculate(single(new BigDecimal("1000.25"), 1), REGULAR, null))
+                .isEqualByComparingTo("980.25");
+    }
+
     private BigDecimal calculate(
             List<PricingCalculator.LineItem> items, String customerType, String couponCode) {
         return calculator.calculateOrderTotal(items, customerType, couponCode);
