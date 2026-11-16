@@ -2,10 +2,10 @@ package com.rbdip.bookstore.review;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.rbdip.bookstore.order.OrderItemRepository;
-import com.rbdip.bookstore.order.OrderRepository;
+import com.rbdip.bookstore.purchase.PurchaseHistory;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,16 +14,14 @@ import org.mockito.ArgumentCaptor;
 class ReviewServiceTest {
 
     private ReviewRepository reviewRepository;
-    private OrderRepository orderRepository;
-    private OrderItemRepository orderItemRepository;
+    private PurchaseHistory purchaseHistory;
     private ReviewService reviewService;
 
     @BeforeEach
     void setUp() {
         reviewRepository = mock(ReviewRepository.class);
-        orderRepository = mock(OrderRepository.class);
-        orderItemRepository = mock(OrderItemRepository.class);
-        reviewService = new ReviewService(reviewRepository, orderRepository, orderItemRepository);
+        purchaseHistory = mock(PurchaseHistory.class);
+        reviewService = new ReviewService(reviewRepository, purchaseHistory);
     }
 
     @Test
@@ -43,9 +41,8 @@ class ReviewServiceTest {
     }
 
     @Test
-    void keepsProvidedAuthorAndChecksPurchaseHistory() {
-        when(orderRepository.findAll()).thenReturn(List.of(mock(com.rbdip.bookstore.order.Order.class)));
-        when(orderItemRepository.findAll()).thenReturn(List.of(mock(com.rbdip.bookstore.order.OrderItem.class)));
+    void keepsProvidedAuthorAndConsultsPurchaseHistoryContract() {
+        when(purchaseHistory.hasPurchased(1L)).thenReturn(true);
         when(reviewRepository.save(org.mockito.ArgumentMatchers.any(Review.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -54,6 +51,7 @@ class ReviewServiceTest {
         assertThat(saved.getAuthorName()).isEqualTo("Ivan Petrov");
         assertThat(saved.getProductId()).isEqualTo(1L);
         assertThat(saved.getComment()).isNull();
+        verify(purchaseHistory).hasPurchased(1L);
     }
 
     @Test

@@ -12,16 +12,14 @@ import org.junit.jupiter.api.Test;
 class OrderControllerTest {
 
     private OrderService orderService;
-    private OrderRepository orderRepository;
-    private OrderItemRepository orderItemRepository;
+    private OrderReader orderReader;
     private OrderController controller;
 
     @BeforeEach
     void setUp() {
         orderService = mock(OrderService.class);
-        orderRepository = mock(OrderRepository.class);
-        orderItemRepository = mock(OrderItemRepository.class);
-        controller = new OrderController(orderService, orderRepository, orderItemRepository);
+        orderReader = mock(OrderReader.class);
+        controller = new OrderController(orderService, orderReader);
     }
 
     @Test
@@ -38,36 +36,19 @@ class OrderControllerTest {
     }
 
     @Test
-    void listOrdersReturnsCustomerNameAndItems() {
-        Order order = mock(Order.class);
-        when(order.getId()).thenReturn(1L);
-        when(order.getCustomerFullName()).thenReturn("Anna Sidorova");
-        when(order.getStatus()).thenReturn("new");
+    void listOrdersReturnsSummariesFromReader() {
+        OrderSummary summary = new OrderSummary(
+                1L, "Anna Sidorova", "new", List.of(new OrderSummary.Item("Refactoring", 2)));
+        when(orderReader.listOrders()).thenReturn(List.of(summary));
 
-        OrderItem item = mock(OrderItem.class);
-        when(item.getProductName()).thenReturn("Refactoring");
-        when(item.getQuantity()).thenReturn(2);
+        List<OrderSummary> response = controller.listOrders();
 
-        when(orderRepository.findAll()).thenReturn(List.of(order));
-        when(orderItemRepository.findByOrderId(1L)).thenReturn(List.of(item));
-
-        List<Map<String, Object>> response = controller.listOrders();
-
-        assertThat(response).hasSize(1);
-        Map<String, Object> orderView = response.get(0);
-        assertThat(orderView)
-                .containsEntry("id", 1L)
-                .containsEntry("customerFullName", "Anna Sidorova")
-                .containsEntry("status", "new");
-        @SuppressWarnings("unchecked")
-        List<Map<String, Object>> items = (List<Map<String, Object>>) orderView.get("items");
-        assertThat(items).containsExactly(
-                Map.of("productName", "Refactoring", "quantity", 2));
+        assertThat(response).containsExactly(summary);
     }
 
     @Test
     void listOrdersReturnsEmptyListWhenThereAreNoOrders() {
-        when(orderRepository.findAll()).thenReturn(List.of());
+        when(orderReader.listOrders()).thenReturn(List.of());
 
         assertThat(controller.listOrders()).isEmpty();
     }
